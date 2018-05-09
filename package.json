@@ -7,6 +7,7 @@
   "dependencies": {
     "flat-tree": "^1.6.0",
     "jsonkv": "^1.0.0",
+    "pumpify": "^1.5.0",
     "sodium-universal": "^2.0.0",
     "through2": "^2.0.3"
   },
