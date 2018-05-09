@@ -1,0 +1,16 @@
+{
+  "name": "antani",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "flat-tree": "^1.6.0",
+    "jsonkv": "^1.0.0",
+    "sodium-universal": "^2.0.0",
+    "through2": "^2.0.3"
+  },
+  "devDependencies": {
+    "from2": "^2.3.0"
+  }
+}
