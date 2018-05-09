@@ -5,19 +5,24 @@ const [ , , cmd, arg ] = process.argv
 
 if (cmd === 'write') write()
 else if (cmd === 'root') root()
-else if (cmd === 'parent') parent(arg)
+else if (cmd === 'node') node(arg)
 else if (cmd === 'bucket') bucket(arg)
+else if (cmd === 'proof') proof(arg)
 
 function root () {
   tree('balances.json').root(console.log)
 }
 
-function parent (index) {
-  tree('balances.json').parent(parseInt(index, 10), console.log)
+function node (index) {
+  tree('balances.json').node(parseInt(index, 10), console.log)
 }
 
 function bucket (key) {
   tree('balances.json').bucket(key, console.log)
+}
+
+function proof (key) {
+  tree('balances.json').proof(key, console.log)
 }
 
 function write () {
