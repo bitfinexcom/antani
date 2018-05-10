@@ -5,6 +5,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "correct-compare": "^1.0.1",
     "flat-tree": "^1.6.0",
     "jsonkv": "^1.0.0",
     "pumpify": "^1.5.0",

@@ -31,9 +31,12 @@ function write () {
   const buckets = from.obj(function (size, cb) {
     if (!missing--) return cb(null, null)
 
+    var keys = tree.keygen()
+
     cb(null, {
       balance: Math.round(Math.random() * 10000),
-      key: Math.random().toString(16).slice(2)
+      key: keys.key,
+      secretKey: keys.secretKey
     })
   })
 

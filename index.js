@@ -14,6 +14,10 @@ function Tree (name) {
 
 Tree.createWriteStream = createWriteStream
 
+Tree.keygen = function () {
+  return crypto.keygen()  
+}
+
 Tree.prototype.root = function (cb) {
   this.db.get({type: 'root'}, function (err, node) {
     if (err) return cb(err)
