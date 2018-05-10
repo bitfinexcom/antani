@@ -3,6 +3,7 @@ const pumpify = require('pumpify')
 const flat = require('flat-tree')
 const createTreeStream = require('./lib/tree-stream')
 const sort = require('./lib/sort')
+const crypto = require('./lib/crypto')
 
 module.exports = Tree
 
@@ -69,7 +70,7 @@ Tree.prototype.proof = function (key, cb) {
 
     function onbucket (err, node) {
       if (err) return cb(err)
-      // TODO: verify node
+      if (!crypto.verifyBucket(node)) return cb(new Error('Bucket has invalid signature'))
       up(node)
     }
 
@@ -92,7 +93,7 @@ Tree.prototype.proof = function (key, cb) {
           balance: proof.peaks.map(node => node.balance).reduce((a, b) => a + b, 0)
         }
 
-        newRoot.hash = 'deadbeef' // TODO: actual hash
+        newRoot.hash = crypto.hashRoot(proof.peaks)
 
         if (newRoot.hash !== root.hash) return cb(new Error('Checksum mismatch'))
         cb(null, proof)
@@ -111,7 +112,7 @@ Tree.prototype.proof = function (key, cb) {
           balance: sibling.balance + node.balance
         }
 
-        parent.hash = 'deadbeef' // TODO: actual hash
+        parent.hash = crypto.hashParent(sibling, node)
         up(parent)
       })
     }

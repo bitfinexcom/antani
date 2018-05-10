@@ -9,7 +9,8 @@
     "jsonkv": "^1.0.0",
     "pumpify": "^1.5.0",
     "sodium-universal": "^2.0.0",
-    "through2": "^2.0.3"
+    "through2": "^2.0.3",
+    "uint64be": "^2.0.2"
   },
   "devDependencies": {
     "from2": "^2.3.0"
