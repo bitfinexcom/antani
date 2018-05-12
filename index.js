@@ -4,6 +4,7 @@ const flat = require('flat-tree')
 const createTreeStream = require('./lib/tree-stream')
 const sort = require('./lib/sort')
 const crypto = require('./lib/crypto')
+const bucket = require('./lib/bucket')
 
 module.exports = Tree
 
@@ -15,7 +16,11 @@ function Tree (name) {
 Tree.createWriteStream = createWriteStream
 
 Tree.keygen = function () {
-  return crypto.keygen()  
+  return crypto.keygen()
+}
+
+Tree.bucket = function (b) {
+  return bucket(b)
 }
 
 Tree.prototype.root = function (cb) {
