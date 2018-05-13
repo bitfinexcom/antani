@@ -121,6 +121,7 @@ Tree.prototype.proof = function (key, cb) {
           balance: sibling.balance + node.balance
         }
 
+        proof.nodes.push(sibling)
         parent.hash = crypto.hashParent(sibling, node)
         up(parent)
       })
