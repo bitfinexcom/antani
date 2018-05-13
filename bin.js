@@ -61,8 +61,9 @@ function write (treePath, inputPath) {
     for (var i = 0; i < buckets.length; i++) {
       var keys = tree.keygen()
 
-      secretKeysStream.write(`${accno}\t${keys.secretKey}\n`)
-      publicKeysStream.write(`${accno}\t${keys.key}\n`)
+      // for simplicity we ignore backpressure here, the tree is the bottleneck anyway
+      secretKeysStream.write(`${accno}\t${keys.secretKey}\r\n`)
+      publicKeysStream.write(`${accno}\t${keys.key}\r\n`)
 
       this.push({
         balance: buckets[i],
