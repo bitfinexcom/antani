@@ -26,6 +26,14 @@ Tree.prototype.root = function (cb) {
   })
 }
 
+Tree.prototype.verify = function (cb) {
+  this.db.get({type: 'root'}, function (err, node) {
+    if (err) return cb(err)
+    if (!node) return cb(new Error('Root not found'))
+    cb(null, crypto.verify(node.commitment, node.decommitment, node.balance))
+  })
+}
+
 Tree.prototype.leaf = function (key, cb) {
   const self = this
   this.db.get({type: 'key', key}, function (err, node) {

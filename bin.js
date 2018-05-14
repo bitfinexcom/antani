@@ -46,6 +46,10 @@ function proof (treePath, key) {
   tree(treePath).proof(key, console.log)
 }
 
+function verify (treePath) {
+  tree(treePath).verify(console.log)
+}
+
 function write (treePath, inputPath) {
   var inputStream = process.stdin
   if (inputPath !== '-') inputStream = fs.createReadStream(path.join(process.cwd(), inputPath))
