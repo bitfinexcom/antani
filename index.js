@@ -1,8 +1,10 @@
 const jsonkv = require('jsonkv')
 const pump = require('pump')
+const duplexify = require('duplexify')
 const flat = require('flat-tree')
 const eos = require('end-of-stream')
 const cmp = require('compare')
+const through = require('through2')
 const createTreeStream = require('./lib/tree-stream')
 const crypto = require('./lib/crypto')
 const bucket = require('./lib/bucket')
@@ -137,12 +139,15 @@ function sortByKey (a, b) {
   return cmp(a.key, b.key)
 }
 
-function createWriteStream (name, cb) {
+function createWriteStream (name) {
   const sortedKeys = jsonkv.createWriteStream(name + '.sorted-keys')
-  const treeStream = createTreeStream() 
+  const stream = duplexify.obj()
 
-  eos(sortedKeys, function (err) {
-    if (err) return cb(err)
+  stream.setWritable(sortedKeys)
+  stream.setReadable(false)
+
+  stream.on('prefinish', function () {
+    stream.cork()
 
     const tree = jsonkv(name + '.sorted-keys')
 
@@ -151,13 +156,16 @@ function createWriteStream (name, cb) {
       createTreeStream(),
       jsonkv.createWriteStream(name, (a, b) => a.index - b.index),
       function (err) {
-        if (err) return cb(err)
-        tree.destroy(cb)
+        if (err) return stream.destroy(err)
+        tree.destroy(function (err) {
+          if (err) return stream.destroy(err)
+          stream.uncork()
+        })
       }
     )
   })
   
-  return sortedKeys
+  return stream
 }
 
 function midpoint (btm, top) {
