@@ -188,7 +188,7 @@ function render (state, emit) {
     }))
   }
 
-  return html`<body style="" class="sans-serif">
+  return html`<body style="min-height: 100vh;" class="sans-serif">
     <article class="ph3 ph5-ns pv5">
       <header class="w-50-ns pr4-ns">
         <h1 class="mb3 mt0 lh-title">Antani</h1>
