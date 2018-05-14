@@ -15,15 +15,16 @@ switch (cmd) {
   case 'write': return write(argv._[1], argv._[2])
   case 'root': return root(argv._[1])
   case 'node': return node(argv._[1], argv._[2])
-  case 'bucket': return bucket(argv._[1], argv._[2])
+  case 'leaf': return leaf(argv._[1], argv._[2])
   case 'proof': return proof(argv._[1], argv._[2])
+  case 'verify': return verify(argv._[1])
   default:
     console.error(`Usage: antani <cmd> <file> [options]
 
   antani write <file> <input-file>
   antani root <file>
   antani node <file> <index>
-  antani bucket <file> <public-key>
+  antani leaf <file> <public-key>
   antani proof <file> <public-key>
 `)
   process.exit(1)
@@ -37,8 +38,8 @@ function node (treePath, index) {
   tree(treePath).node(parseInt(index, 10), console.log)
 }
 
-function bucket (treePath, key) {
-  tree(treePath).bucket(key, console.log)
+function leaf (treePath, key) {
+  tree(treePath).leaf(key, console.log)
 }
 
 function proof (treePath, key) {

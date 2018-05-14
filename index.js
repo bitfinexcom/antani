@@ -4,7 +4,6 @@ const flat = require('flat-tree')
 const createTreeStream = require('./lib/tree-stream')
 const sort = require('./lib/sort')
 const crypto = require('./lib/crypto')
-const bucket = require('./lib/bucket')
 
 module.exports = Tree
 
@@ -19,10 +18,6 @@ Tree.keygen = function () {
   return crypto.keygen()
 }
 
-Tree.bucket = function (b) {
-  return bucket(b)
-}
-
 Tree.prototype.root = function (cb) {
   this.db.get({type: 'root'}, function (err, node) {
     if (err) return cb(err)
@@ -31,7 +26,7 @@ Tree.prototype.root = function (cb) {
   })
 }
 
-Tree.prototype.bucket = function (key, cb) {
+Tree.prototype.leaf = function (key, cb) {
   const self = this
   this.db.get({type: 'key', key}, function (err, node) {
     if (err) return cb(err)
@@ -74,10 +69,10 @@ Tree.prototype.proof = function (key, cb) {
       if (--missing) return
 
       if (error) return cb(error)
-      self.bucket(key, onbucket)
+      self.leaf(key, onleaf)
     }
 
-    function onbucket (err, node) {
+    function onleaf (err, node) {
       if (err) return cb(err)
       up(node)
     }
