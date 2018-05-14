@@ -1,8 +1,9 @@
 const jsonkv = require('jsonkv')
-const pumpify = require('pumpify')
+const pump = require('pump')
+const duplexify = require('duplexify')
 const flat = require('flat-tree')
+const cmp = require('compare')
 const createTreeStream = require('./lib/tree-stream')
-const sort = require('./lib/sort')
 const crypto = require('./lib/crypto')
 const bucket = require('./lib/bucket')
 
@@ -10,7 +11,7 @@ module.exports = Tree
 
 function Tree (name) {
   if (!(this instanceof Tree)) return new Tree(name)
-  this.db = jsonkv(name, sort)
+  this.db = jsonkv(name, sortByKey)
 }
 
 Tree.createWriteStream = createWriteStream
@@ -24,24 +25,27 @@ Tree.bucket = function (b) {
 }
 
 Tree.prototype.root = function (cb) {
-  this.db.get({type: 'root'}, function (err, node) {
+  const self = this
+  this.db.open(function (err) {
     if (err) return cb(err)
-    if (!node) return cb(new Error('Root not found'))
-    cb(null, node)
+    self.db.getByIndex(self.db.length - 1, function (err, node) {
+      if (err) return cb(err)
+      if (!node) return cb(new Error('Root not found'))
+      cb(null, node)
+    })
   })
 }
 
 Tree.prototype.bucket = function (key, cb) {
-  const self = this
-  this.db.get({type: 'key', key}, function (err, node) {
+  this.db.get({key}, {midpoint}, function (err, node) {
     if (err) return cb(err)
     if (!node) return cb(new Error('Bucket not found'))
-    self.node(node.index, cb)
+    cb(null, node)
   })
 }
 
 Tree.prototype.node = function (index, cb) {
-  this.db.get({type: 'node', index}, function (err, node) {
+  this.db.getByIndex(index, function (err, node) {
     if (err) return cb(err)
     if (!node) return cb(new Error('Node not found'))
     cb(null, node)
@@ -96,7 +100,6 @@ Tree.prototype.proof = function (key, cb) {
           : 0
 
         const newRoot = {
-          type: 'root',
           index,
           hash: null,
           balance: proof.peaks.map(node => node.balance).reduce((a, b) => a + b, 0)
@@ -115,7 +118,6 @@ Tree.prototype.proof = function (key, cb) {
         if (err) return cb(err)
 
         const parent = {
-          type: 'node',
           index: flat.parent(node.index),
           hash: null,
           balance: sibling.balance + node.balance
@@ -129,6 +131,42 @@ Tree.prototype.proof = function (key, cb) {
   })
 }
 
+function sortByKey (a, b) {
+  if (!b.key) return 1
+  if (!a.key) return -1
+  return cmp(a.key, b.key)
+}
+
 function createWriteStream (name) {
-  return pumpify.obj(createTreeStream(), jsonkv.createWriteStream(name, sort))
+  const sortedKeys = jsonkv.createWriteStream(name + '.sorted-keys')
+  const stream = duplexify.obj()
+
+  stream.setWritable(sortedKeys)
+  stream.setReadable(false)
+
+  stream.on('prefinish', function () {
+    stream.cork()
+
+    const tree = jsonkv(name + '.sorted-keys')
+
+    pump(
+      tree.createReadStream(),
+      createTreeStream(),
+      jsonkv.createWriteStream(name, (a, b) => a.index - b.index),
+      function (err) {
+        if (err) return stream.destroy(err)
+        tree.destroy(function (err) {
+          if (err) return stream.destroy(err)
+          stream.uncork()
+        })
+      }
+    )
+  })
+
+  return stream
+}
+
+function midpoint (btm, top) {
+  const mid = Math.floor((top + btm) / 2)
+  return mid & 1 ? mid - 1 : mid
 }

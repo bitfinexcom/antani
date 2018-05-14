@@ -84,6 +84,6 @@ function write (treePath, inputPath) {
       process.exit(1)
     }
 
-    console.log('tree file written to ./balances.json')
+    console.log('tree file written to ' + treePath)
   })
 }
