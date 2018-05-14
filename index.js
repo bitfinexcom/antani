@@ -2,9 +2,7 @@ const jsonkv = require('jsonkv')
 const pump = require('pump')
 const duplexify = require('duplexify')
 const flat = require('flat-tree')
-const eos = require('end-of-stream')
 const cmp = require('compare')
-const through = require('through2')
 const createTreeStream = require('./lib/tree-stream')
 const crypto = require('./lib/crypto')
 const bucket = require('./lib/bucket')
@@ -164,7 +162,7 @@ function createWriteStream (name) {
       }
     )
   })
-  
+
   return stream
 }
 
