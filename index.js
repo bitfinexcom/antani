@@ -79,7 +79,6 @@ Tree.prototype.proof = function (key, cb) {
 
     function onbucket (err, node) {
       if (err) return cb(err)
-      if (!crypto.verifyBucket(node)) return cb(new Error('Bucket has invalid signature'))
       up(node)
     }
 
@@ -99,7 +98,7 @@ Tree.prototype.proof = function (key, cb) {
           type: 'root',
           index,
           hash: null,
-          balance: proof.peaks.map(node => node.balance).reduce((a, b) => a + b, 0)
+          commitment: crypto.sum(proof.peaks.map(node => node.commitment))
         }
 
         newRoot.hash = crypto.hashRoot(proof.peaks)
@@ -118,7 +117,7 @@ Tree.prototype.proof = function (key, cb) {
           type: 'node',
           index: flat.parent(node.index),
           hash: null,
-          balance: sibling.balance + node.balance
+          commitment: crypto.sum([sibling.commitment, node.commitment])
         }
 
         proof.nodes.push(sibling)
@@ -130,5 +129,9 @@ Tree.prototype.proof = function (key, cb) {
 }
 
 function createWriteStream (name) {
-  return pumpify.obj(createTreeStream(), jsonkv.createWriteStream(name, sort))
+  var ws = createTreeStream()
+  var s = pumpify.obj(ws, jsonkv.createWriteStream(name, sort))
+  s.decommitments = ws.decommitments
+
+  return s
 }

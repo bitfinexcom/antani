@@ -1,3 +1,4 @@
+#!/usr/bin/env node --harmony-bigint
 const tree = require('./')
 const fs = require('fs')
 const path = require('path')
@@ -62,7 +63,7 @@ function write (treePath, inputPath) {
       var keys = tree.keygen()
 
       // for simplicity we ignore backpressure here, the tree is the bottleneck anyway
-      secretKeysStream.write(`${accno}\t${keys.secretKey}\r\n`)
+      //secretKeysStream.write(`${accno}\t${keys.secretKey}\r\n`)
       publicKeysStream.write(`${accno}\t${keys.key}\r\n`)
 
       this.push({
@@ -75,8 +76,14 @@ function write (treePath, inputPath) {
     cb()
   })
 
-  pump(inputStream, split(), bucketing, tree.createWriteStream(treePath), function (err) {
-    secretKeysStream.end()
+  var ts =  tree.createWriteStream(treePath)
+
+  ts.decommitments.pipe(through.obj(function (ch, _, cb) {
+    cb(null, ch + '\n')
+  })).pipe(secretKeysStream)
+
+  pump(inputStream, split(), bucketing, ts, function (err) {
+    //secretKeysStream.end()
     publicKeysStream.end()
 
     if (err) {
