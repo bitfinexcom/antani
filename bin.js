@@ -49,43 +49,25 @@ function write (treePath, inputPath) {
   var inputStream = process.stdin
   if (inputPath !== '-') inputStream = fs.createReadStream(path.join(process.cwd(), inputPath))
 
-  const secretKeysPath = path.join(process.cwd(), 'keys.sec')
-  const publicKeysPath = path.join(process.cwd(), 'keys.pub')
+  const decommitmentsPath = path.join(process.cwd(), 'keys.sec')
+  const decommitmentsStream = fs.createWriteStream(decommitmentsPath)
 
-  const secretKeysStream = fs.createWriteStream(secretKeysPath)
-  const publicKeysStream = fs.createWriteStream(publicKeysPath)
-
-  const bucketing = through.obj(function (account, _, cb) {
+  const commit = through.obj(function (account, _, cb) {
     const [accno, balance] = account.split('\t')
-    const buckets = tree.bucket(parseInt(balance, 10))
 
-    for (var i = 0; i < buckets.length; i++) {
-      var keys = tree.keygen()
-
-      // for simplicity we ignore backpressure here, the tree is the bottleneck anyway
-      //secretKeysStream.write(`${accno}\t${keys.secretKey}\r\n`)
-      publicKeysStream.write(`${accno}\t${keys.key}\r\n`)
-
-      this.push({
-        balance: buckets[i],
-        key: keys.key,
-        secretKey: keys.secretKey
-      })
-    }
-
-    cb()
+    cb(null, {
+      balance: parseInt(balance, 10),
+      key: accno,
+    })
   })
 
   var ts =  tree.createWriteStream(treePath)
 
   ts.decommitments.pipe(through.obj(function (ch, _, cb) {
-    cb(null, ch + '\n')
-  })).pipe(secretKeysStream)
+    cb(null, ch.key + '\t' + ch.decommitment + '\n')
+  })).pipe(decommitmentsStream)
 
-  pump(inputStream, split(), bucketing, ts, function (err) {
-    //secretKeysStream.end()
-    publicKeysStream.end()
-
+  pump(inputStream, split(), commit, ts, function (err) {
     if (err) {
       console.error(err)
       process.exit(1)
