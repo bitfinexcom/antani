@@ -111,9 +111,11 @@ Vote must look like (can be produced with `antani.tree`s `.vote`):
 The receipt looks like:
 
 ```
-receipt: 'base64 encoded signature'
-vote: {
-  // above object
+{
+  receipt: 'base64 encoded signature'
+  vote: {
+    // above object
+  }
 }
 ```
 
