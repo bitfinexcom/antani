@@ -31,23 +31,23 @@ switch (cmd) {
 }
 
 function root (treePath) {
-  tree(treePath).root(console.log)
+  tree(path.join(process.cwd(), treePath)).root(console.log)
 }
 
 function node (treePath, index) {
-  tree(treePath).node(parseInt(index, 10), console.log)
+  tree(path.join(process.cwd(), treePath)).node(parseInt(index, 10), console.log)
 }
 
 function bucket (treePath, key) {
-  tree(treePath).bucket(key, console.log)
+  tree(path.join(process.cwd(), treePath)).bucket(key, console.log)
 }
 
 function proof (treePath, key) {
-  tree(treePath).proof(key, console.log)
+  tree(path.join(process.cwd(), treePath)).proof(key, console.log)
 }
 
 function vote (treePath, key, sk, vote) {
-  tree(treePath).vote(key, sk, vote, console.log)
+  tree(path.join(process.cwd(), treePath)).vote(key, sk, vote, console.log)
 }
 
 function write (treePath, inputPath) {
