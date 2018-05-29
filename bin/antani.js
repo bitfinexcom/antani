@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const tree = require('../')
+const { tree } = require('../')
 const fs = require('fs')
 const path = require('path')
 const through = require('through2')

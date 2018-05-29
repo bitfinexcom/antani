@@ -13,7 +13,7 @@ Also provides a mechanism for users to use their balances to vote on proposals.
 
 ## Merkle Balances Tree
 
-#### `const writeStream = antani.createWriteStream(filename)`
+#### `const writeStream = antani.tree.createWriteStream(filename)`
 
 Create a new balances data structure. A merkle tree will be stored in `filename` as
 valid JSON but white space padded to support efficient lookups.
@@ -28,20 +28,20 @@ Expects a stream of buckets looking like this
 }
 ```
 
-See `tree.keyPair()` with info on how to generate the keypairs.
+See `antani.tree.keyPair()` with info on how to generate the keypairs.
 
 Written to it. The final JSON file will contain these buckets (minus the secretKeys) and a signature for each, as
 well as a merkle tree that be used to sum all of the together.
 
-#### `const balanceTree = antani(filename)
+#### `const balanceTree = antani.tree(filename)`
 
 Create a new balance tree. Filename should be one of the files produced above.
 
-#### `const keyPair = antani.keyPair()`
+#### `const keyPair = antani.tree.keyPair()`
 
 Produces a valid ed25519 keypair encoded as base64.
 
-#### `const buckets = antani.buckets(balance)`
+#### `const buckets = antani.tree.buckets(balance)`
 
 Splits a balance into an array of random buckets. Use this to anonymise the data written to the balance tree.
 
@@ -72,7 +72,11 @@ If it does not verify it will return an error instead.
 
 ## Voting
 
-(@emilbayes fill this in)
+#### `const ballot = antani.ballot('ballot.json)`
+
+Create a new ballot.
+
+(@emilbayes fill the rest of this in)
 
 ## License
 
