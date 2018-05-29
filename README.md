@@ -37,7 +37,7 @@ well as a merkle tree that be used to sum all of the together.
 
 Create a new balance tree. Filename should be one of the files produced above.
 
-#### `const keyPair = antani.tree.keyPair()`
+#### `const keyPair = antani.tree.keygen()`
 
 Produces a valid ed25519 keypair encoded as base64.
 
@@ -48,6 +48,11 @@ Splits a balance into an array of random buckets. Use this to anonymise the data
 #### `balanceTree.bucket(key, cb)`
 
 Lookup a bucket by public key in the balances file.
+
+#### `balanceTree.vote(key, secretKey, vote, cb)`
+
+Use bucket identified by `key` and sign a vote with choice `vote`. This can
+be `.push`ed to `antani.ballot`.
 
 #### `balanceTree.node(index, cb)`
 
@@ -72,11 +77,53 @@ If it does not verify it will return an error instead.
 
 ## Voting
 
-#### `const ballot = antani.ballot('ballot.json)`
+#### `const ballot = antani.ballot(filename, keypair, tree, candidates)`
 
-Create a new ballot.
+Create a new ballot. Takes the following arguments:
 
-(@emilbayes fill the rest of this in)
+* `filename` for where to store the log of votes.
+* `keypair` used to sign incoming votes so voters can get a receipt. Use `antani.ballot.keygen()` to produce a key pair
+* `tree` must be a `antani.tree` used to lookup incoming votes to check their validity.
+* `candidates` must be an array of strings for validating votes
+
+#### `ballot.push(vote, cb)`
+
+Cast a vote and commit it to the ballot log. If successful `cb` will get a
+receipt for proving that a vote was committed to the log. Note that each
+bucket from `antani.tree` can only vote once.
+
+Vote must look like (can be produced with `antani.tree`s `.vote`):
+
+```
+{
+  // These are all from the bucket
+  key: …,
+  signature: …,
+  hash: …,
+  index: …,
+  balance: …,
+  // these are special vote properties
+  vote: …,
+  voteSignature: …
+}
+```
+
+The receipt looks like:
+
+```
+receipt: 'base64 encoded signature'
+vote: {
+  // above object
+}
+```
+
+#### `ballot.verifyVote(vote, cb)`
+
+Check that `vote` is valid, calling `cb` with an error if anything is invalid
+
+#### `ballot.finalize(cb)`
+
+End the vote log so it can be tallied.
 
 ## License
 
