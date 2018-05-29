@@ -77,13 +77,13 @@ function render (state, emit) {
       label: 'Retrieve',
       data: JSON.stringify(state.root, null, 2),
       cb: function () {
-        console.log('roots')
         state.tree.root(function (err, r) {
           if (err) return console.error(err)
 
           state.root = r
           emit('render')
         })
+        return false
       }
     }))
   }
@@ -115,6 +115,7 @@ function render (state, emit) {
             }
           })
         })
+        return false
       }
     }))
     items.push(panel({
@@ -155,6 +156,7 @@ function render (state, emit) {
             }
           })
         })
+        return false
       }
     }))
   }
@@ -177,13 +179,14 @@ function render (state, emit) {
         signatures: state.signatures
       }, null, 2),
       cb: function () {
-        if (state.ownershipMessage == false) return
+        if (state.ownershipMessage == false) return false
         state.signatures = state.secs.map(function (sk) {
           var signature = Buffer.alloc(sodium.crypto_sign_BYTES)
           sodium.crypto_sign_detached(signature, Buffer.from(state.ownershipMessage), Buffer.from(sk, 'base64'))
           return signature.toString('base64')
         })
         emit('render')
+        return false
       }
     }))
   }
@@ -240,10 +243,10 @@ var panelCss = css`
 function panel (obj) {
   return html`<div class="${panelCss}">
     <h2>${obj.title}</h2>
-    <div class="mr4">
+    <form class="mr4" onsubmit=${obj.cb}>
       <p class="lh-copy measure mt4 mt0-ns">${obj.description}</p>
       <button onclick=${obj.cb} class="f6 no-underline dib v-mid bg-blue white ba b--blue ph3 pv2 mb3 pointer dim">${obj.label}</button>
-    </div>
+    </form>
     <pre class="overflow-scroll mv0 bg-dark-gray b--black ba near-white pa2">${obj.data}</pre>
   </div>`
 }
