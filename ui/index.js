@@ -161,6 +161,49 @@ function render (state, emit) {
     }))
   }
 
+  if (state.tree && state.pubs && state.secs) {
+    function oncandidateinput () {
+      state.currentCandidate = this.value
+    }
+
+    items.push(panel({
+      title: 'Voting',
+      description: html`<span>
+        Sign a vote with each of your secret keys, which can be send to
+        <code>antani-ballot</code><br>
+        <input class="pa2 input-reset ba bg-transparent w-100" oninput=${oncandidateinput} value="${state.currentCandidate || ''}" placeholder="Option 1" name="candidate"/>
+      </span>`,
+      label: 'Sign',
+      data: JSON.stringify(state.votes, null, 2),
+      cb: function () {
+        if (state.currentCandidate == false) return false
+
+        var cand = state.currentCandidate // avoid concurrency issue
+        var votes = []
+        var missing = state.pubs.length
+        state.pubs.map(function (pub, i) {
+          state.tree.vote(pub, state.secs[i], cand, function (err, vote) {
+            if (missing === 0) return
+
+            if (err) {
+              missing = 0
+              return console.error(err)
+            }
+
+            missing--
+            votes[i] = vote
+
+            if (missing === 0) {
+              state.votes = votes
+              emit('render')
+            }
+          })
+        })
+        return false
+      }
+    }))
+  }
+
   if (state.secs) {
     function onmessageinput () {
       state.ownershipMessage = this.value
