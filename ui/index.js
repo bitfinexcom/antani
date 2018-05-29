@@ -65,7 +65,7 @@ app.use(function (state, emitter) {
 
 app.route('/', render)
 app.route('/c0e02rV7eJoZEKQq57-YhwEp55vm1NdeRatOZ8VJgv8', render)
-app.route('*', render)
+app.route('/*', render)
 
 function render (state, emit) {
   var items = []
