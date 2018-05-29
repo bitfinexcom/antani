@@ -44,6 +44,17 @@ Tree.prototype.bucket = function (key, cb) {
   })
 }
 
+Tree.prototype.vote = function (key, sk, vote, cb) {
+  this.bucket(key, function (err, bucket) {
+    if (err) return cb(err)
+
+    bucket.vote = vote
+    bucket.voteSignature = crypto.signVote(sk, bucket)
+
+    return cb(null, bucket)
+  })
+}
+
 Tree.prototype.node = function (index, cb) {
   this.db.getByIndex(index, function (err, node) {
     if (err) return cb(err)

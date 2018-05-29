@@ -16,6 +16,7 @@ switch (cmd) {
   case 'node': return node(argv._[1], argv._[2])
   case 'bucket': return bucket(argv._[1], argv._[2])
   case 'proof': return proof(argv._[1], argv._[2])
+  case 'vote': return vote(argv._[1], argv._[2], argv._[3], argv._[4])
   default:
     console.error(`Usage: antani <cmd> <file> [options]
 
@@ -24,6 +25,7 @@ switch (cmd) {
   antani node <file> <index>
   antani bucket <file> <public-key>
   antani proof <file> <public-key>
+  antani vote <file> <public-key> <secret-key> <vote>
 `)
   process.exit(1)
 }
@@ -42,6 +44,10 @@ function bucket (treePath, key) {
 
 function proof (treePath, key) {
   tree(treePath).proof(key, console.log)
+}
+
+function vote (treePath, key, sk, vote) {
+  tree(treePath).vote(key, sk, vote, console.log)
 }
 
 function write (treePath, inputPath) {
