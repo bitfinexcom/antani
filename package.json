@@ -18,7 +18,7 @@
     "minimist": "^1.2.0",
     "mutexify": "^1.2.0",
     "pump": "^3.0.0",
-    "random-access-stream": "^1.1.0",
+    "@mafintosh/random-access-stream": "^2.0.0",
     "secure-random-uniform": "^3.1.0",
     "sodium-universal": "^2.0.0",
     "sparse-bitfield": "^3.0.3",
