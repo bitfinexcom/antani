@@ -255,8 +255,8 @@ function render (state, emit) {
     }))
   }
 
-  if (state.secs) {
-    function onmessageinput () {
+  if (state.secs && state.pubs) {
+    function onOwnershipMessageInput () {
       state.ownershipMessage = this.value
     }
 
@@ -265,7 +265,7 @@ function render (state, emit) {
       description: html`<span>
         Sign a message with each of your secret keys, to prove ownership of your
         public keys<br>
-        <input class="pa2 input-reset ba bg-transparent w-100" oninput=${onmessageinput} value="${state.ownershipMessage || ''}" placeholder="proof of ownership message" name="message"/>
+        <input class="pa2 input-reset ba bg-transparent w-100" oninput=${onOwnershipMessageInput} value="${state.ownershipMessage || ''}" placeholder="proof of ownership message" name="message"/>
       </span>`,
       label: 'Sign',
       data: JSON.stringify({
@@ -274,15 +274,61 @@ function render (state, emit) {
       }, null, 2),
       cb: function () {
         if (state.ownershipMessage == false) return false
-        state.signatures = state.secs.map(function (sk) {
-          var signature = Buffer.alloc(sodium.crypto_sign_BYTES)
-          sodium.crypto_sign_detached(signature, Buffer.from(state.ownershipMessage), Buffer.from(sk, 'base64'))
-          return signature.toString('base64')
+
+        if (state.secs.length !== state.pubs.length) {
+          return alert('Mismatch pubs.size vs secs.size')
+        }
+
+        var buckets = []
+        for (var i = 0; i < state.secs.length; i++) {
+          buckets.push({ key: state.pubs[i], secretKey: state.secs[i] })
+        }
+
+        state.tree.signMessage(buckets, state.ownershipMessage, function(err, res) {
+          if (err) {
+            return alert(err)
+          }
+          state.signatures = res.signatures
+          emit('render')
         })
-        emit('render')
         return false
       }
     }))
+  }
+
+  if (state.pubs) {
+    function onVerifyOwnershipMessageInput () {
+      state.verifyOwnershipMessage = this.value
+    }
+
+    items.push(panel({
+      title: 'Verify Ownership',
+      description: html`<span>
+        Verify a message using the owner's public keys<br>
+        <input class="pa2 input-reset ba bg-transparent w-100" oninput=${onVerifyOwnershipMessageInput} value="${state.verifyOwnershipMessage || ''}" placeholder="validate ownership of a message" name="message"/>
+      </span>`,
+      label: 'Verify',
+      data: JSON.stringify({
+        verify: state.verifiedOwnership
+      }, null, 2),
+      cb: function () {
+        if (state.verifyOwnershipMessage == false) return false
+        var verifyOwnershipMessage = null
+        try { verifyOwnershipMessage = JSON.parse(state.verifyOwnershipMessage) } catch(err) {
+          return alert('Invalid Message')
+        }
+         
+        state.tree.verifyMessage(state.pubs, verifyOwnershipMessage, function(err) {
+          if (err) {
+            return alert(err)
+          }
+          state.verifiedOwnership = { valid: !!!err }
+          emit('render')
+        })
+        return false
+      }
+    }))
+
   }
 
   return html`<body style="min-height: 100vh;" class="sans-serif">
