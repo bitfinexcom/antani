@@ -151,7 +151,8 @@ The receipt looks like:
 
 #### `ballot.verifyVote(vote, cb)`
 
-Check that `vote` is valid, calling `cb` with an error if anything is invalid
+Check that `vote` is valid, calling `cb` with an error if anything is invalid.
+`ballot.push` will call this function before committing any votes to the log.
 
 
 #### `ballot.tally(cb)`
