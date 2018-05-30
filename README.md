@@ -153,6 +153,13 @@ The receipt looks like:
 
 Check that `vote` is valid, calling `cb` with an error if anything is invalid
 
+
+#### `ballot.tally(cb)`
+
+Tally the votes after `.finalize` has been called. Will error if any votes
+contain a `.vote` that is not in the list `candidates`. Calls `cb` with the
+counts where each vote is weighted by it's balance.
+
 #### `ballot.finalize(cb)`
 
 End the vote log so it can be tallied.
