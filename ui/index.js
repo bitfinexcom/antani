@@ -30,10 +30,13 @@ function dataFiles (files, cb) {
     var next = jsons.pop()
     if (!next) return cb(result)
 
-    raf(next).read(0, 1, function (err, buf) {
+    raf(next).read(0, 20, function (err, buf) {
       if (err) return loop()
-      if (buf.toString() === '[') result.ballot = next
+      console.log(buf.toString())
+      if (buf.toString().indexOf('"type":"ballot"') > -1) result.ballot = next
       else result.tree = next
+
+      console.log(result)
       loop()
     })
   }
@@ -54,8 +57,8 @@ app.use(function (state, emitter) {
         return f
       }, null)
 
-      if (jsonFiles.balances) {
-        state.tree = tree(raf(jsonFiles.balances))
+      if (jsonFiles.tree) {
+        state.tree = tree(raf(jsonFiles.tree))
         emitter.emit('render')
       }
 
@@ -66,6 +69,7 @@ app.use(function (state, emitter) {
         state.ballotRaf = raf(jsonFiles.ballot)
       }
 
+      console.log(!!state.tree, !!state.ballotRaf, state.tree && state.ballotRaf)
       if (state.tree && state.ballotRaf) {
         state.ballot = ballot(state.ballotRaf, state.tree)
       }
