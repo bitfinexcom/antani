@@ -30,9 +30,9 @@ function init (keyPath) {
 
 function cast (keyPath, ballotPath, treePath, voteStr) {
   var t = antani.tree(path.join(process.cwd(), treePath))
-  var keys = JSON.parse(fs.readFileSync(path.join(process.cwd(), keyPath), 'utf8'))
+  var keypair = JSON.parse(fs.readFileSync(path.join(process.cwd(), keyPath), 'utf8'))
   var candidates = ['pindis', 'rød grød med fløde', 'koldskål']
-  var b = antani.ballot(path.join(process.cwd(), ballotPath), keys, t, candidates)
+  var b = antani.ballot(path.join(process.cwd(), ballotPath), t, {keypair, candidates})
 
   var vote = JSON.parse(voteStr)
 
@@ -41,18 +41,18 @@ function cast (keyPath, ballotPath, treePath, voteStr) {
 
 function finalize (keyPath, ballotPath, treePath) {
   var t = antani.tree(path.join(process.cwd(), treePath))
-  var keys = JSON.parse(fs.readFileSync(path.join(process.cwd(), keyPath), 'utf8'))
+  var keypair = JSON.parse(fs.readFileSync(path.join(process.cwd(), keyPath), 'utf8'))
   var candidates = ['pindis', 'rød grød med fløde', 'koldskål']
-  var b = antani.ballot(path.join(process.cwd(), ballotPath), keys, t, candidates)
+  var b = antani.ballot(path.join(process.cwd(), ballotPath), t, {keypair, candidates})
 
   b.finalize(console.log)
 }
 
 function tally (keyPath, ballotPath, treePath) {
   var t = antani.tree(path.join(process.cwd(), treePath))
-  var keys = JSON.parse(fs.readFileSync(path.join(process.cwd(), keyPath), 'utf8'))
+  var keypair = JSON.parse(fs.readFileSync(path.join(process.cwd(), keyPath), 'utf8'))
   var candidates = ['pindis', 'rød grød med fløde', 'koldskål']
-  var b = antani.ballot(path.join(process.cwd(), ballotPath), keys, t, candidates)
+  var b = antani.ballot(path.join(process.cwd(), ballotPath), t, {keypair, candidates})
 
   b.tally(console.log)
 }
