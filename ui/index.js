@@ -19,47 +19,71 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(require('choo-service-worker')())
 }
 
+function dataFiles (files, cb) {
+  var jsons = files.filter(f => f.name.endsWith('.json'))
+  var result = {}
+
+  loop()
+  
+  function loop () {
+    var next = jsons.pop()
+    if (!next) return cb(result)
+
+    raf(next).read(0, 1, function (err, buf) {
+      if (err) return loop()
+      if (buf.toString() === '[') result.ballot = next
+      else result.tree = next
+      loop()
+    })
+  }
+}
+
 app.use(function (state, emitter) {
   if (global.document == null) return
 
   drop(global.document.body, function (files) {
-    var balances = files.reduce(function (f, e) {
-      if (e.name.endsWith('.json')) return e
-      return f
-    }, null)
+    dataFiles(files, function (result) {
+      var balances = result.tree
+      var ballot = result.ballot
 
-    var pubs = files.reduce(function (f, e) {
-      if (e.name.endsWith('.pub')) return e
-      return f
-    }, null)
+      var pubs = files.reduce(function (f, e) {
+        if (e.name.endsWith('.pub')) return e
+        return f
+      }, null)
 
-    var secs = files.reduce(function (f, e) {
-      if (e.name.endsWith('.sec')) return e
-      return f
-    }, null)
+      var secs = files.reduce(function (f, e) {
+        if (e.name.endsWith('.sec')) return e
+        return f
+      }, null)
 
-    if (balances) {
-      state.tree = tree(raf(balances))
-      emitter.emit('render')
-    }
-
-    if (pubs) {
-      fileReaderStream(pubs).pipe(concat(function (err, contents) {
-        if (err) return console.error(err)
-
-        state.pubs = contents.toString().trim().split('\n').map(s => s.trim())
+      if (balances) {
+        state.tree = tree(raf(balances))
         emitter.emit('render')
-      }))
-    }
+      }
 
-    if (secs) {
-      fileReaderStream(secs).pipe(concat(function (err, contents) {
-        if (err) return console.error(err)
-
-        state.secs = contents.toString().trim().split('\n').map(s => s.trim())
+      if (ballot) {
+        state.ballot = ballot(raf(ballot))
         emitter.emit('render')
-      }))
-    }
+      }
+
+      if (pubs) {
+        fileReaderStream(pubs).pipe(concat(function (err, contents) {
+          if (err) return console.error(err)
+
+          state.pubs = contents.toString().trim().split('\n').map(s => s.trim())
+          emitter.emit('render')
+        }))
+      }
+
+      if (secs) {
+        fileReaderStream(secs).pipe(concat(function (err, contents) {
+          if (err) return console.error(err)
+
+          state.secs = contents.toString().trim().split('\n').map(s => s.trim())
+          emitter.emit('render')
+        }))
+      }
+    })
   })
 })
 
