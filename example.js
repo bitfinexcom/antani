@@ -1,4 +1,4 @@
-const tree = require('./')
+const { tree } = require('./')
 const from = require('from2')
 
 const [ , , cmd, arg ] = process.argv

@@ -75,6 +75,36 @@ This proof is returned in the callback as well as an array of all the nodes need
 
 If it does not verify it will return an error instead.
 
+#### `balanceTree.signMessage(buckets, message, cb)`
+
+Sign a generic text message using the buckets you pass in.
+
+The buckets will be verified that they are in the tree before signing and will return an error if not.
+You must pass at least one bucket. A bucket looks like this:
+
+```js
+{
+  key: pubKeyInBase64,
+  secretKey: secKeyInBase64
+}
+```
+
+The object returned looks like this:
+
+```
+{
+  message: 'the message',
+  signatures: [arrayOfBase64Sigs]
+}
+```
+
+#### `balanceTree.verifyMessage(buckets, signedMessage, cb)`
+
+Verify a signed message produced above. `buckets` should just be an array of public keys in base64.
+When verifying it will check that the public keys are indeed in the tree as well as verifying the message itself.
+
+Returns null if everything is good and an error if not.
+
 ## Voting
 
 #### `const ballot = antani.ballot(filename, keypair, tree, candidates)`
