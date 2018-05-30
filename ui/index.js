@@ -7,6 +7,7 @@ var fileReaderStream = require('filereader-stream')
 var concat = require('secure-concat')
 var raf = require('random-access-file-reader')
 var tree = require('..').tree
+var ballot = require('..').ballot
 var print = require('print-flat-tree')
 var sodium = require('sodium-universal')
 
@@ -24,7 +25,7 @@ function dataFiles (files, cb) {
   var result = {}
 
   loop()
-  
+
   function loop () {
     var next = jsons.pop()
     if (!next) return cb(result)
@@ -42,10 +43,7 @@ app.use(function (state, emitter) {
   if (global.document == null) return
 
   drop(global.document.body, function (files) {
-    dataFiles(files, function (result) {
-      var balances = result.tree
-      var ballot = result.ballot
-
+    dataFiles(files, function (jsonFiles) {
       var pubs = files.reduce(function (f, e) {
         if (e.name.endsWith('.pub')) return e
         return f
@@ -56,14 +54,20 @@ app.use(function (state, emitter) {
         return f
       }, null)
 
-      if (balances) {
-        state.tree = tree(raf(balances))
+      if (jsonFiles.balances) {
+        state.tree = tree(raf(jsonFiles.balances))
         emitter.emit('render')
       }
 
-      if (ballot) {
-        state.ballot = ballot(raf(ballot))
-        emitter.emit('render')
+      // These next two are a hack, since antani.ballot needs to have a
+      // a antani.tree also, but we don't want the user to have to drop files in
+      // a specific order
+      if (jsonFiles.ballot) {
+        state.ballotRaf = raf(jsonFiles.ballot)
+      }
+
+      if (state.tree && state.ballotRaf) {
+        state.ballot = ballot(state.ballotRaf, state.tree)
       }
 
       if (pubs) {
@@ -228,6 +232,25 @@ function render (state, emit) {
     }))
   }
 
+  if (state.ballot) {
+    items.push(panel({
+      title: 'Tally Votes',
+      description: html`<span>Tally all the votes in the current ballot</span>`,
+      label: 'Tally',
+      data: JSON.stringify(state.tally, null, 2),
+      cb: function () {
+        state.ballot.tally(function (err, res) {
+          if (err) return console.error(err)
+
+          state.tally = res
+          emit('render')
+        })
+
+        return false
+      }
+    }))
+  }
+
   if (state.secs) {
     function onmessageinput () {
       state.ownershipMessage = this.value
@@ -281,6 +304,11 @@ function render (state, emit) {
           <dt class="dib b"><code>keys.sec</code>:</dt>
           ${state.secs ? html`<dd class="dib ml1 dark-green">✔︎</dd>` : html`<dd class="dib ml1 dark-red">✗</dd>`}
           <dd class="ml3 mt1 gray">List of secret keys to prove ownership or cast vote</dd>
+        </dl>
+        <dl class="f6 lh-title mv2">
+          <dt class="dib b"><code>ballot.json</code>:</dt>
+          ${state.ballot ? html`<dd class="dib ml1 dark-green">✔︎</dd>` : html`<dd class="dib ml1 dark-red">✗</dd>`}
+          <dd class="ml3 mt1 gray">File containing a ballot list of cast votes, so it can be verified and tallied. Required <code>balances.json</code> to be present</dd>
         </dl>
       </div>
       ${items}
