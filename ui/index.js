@@ -6,7 +6,7 @@ var drop = require('drag-and-drop-files')
 var fileReaderStream = require('filereader-stream')
 var concat = require('secure-concat')
 var raf = require('random-access-file-reader')
-var tree = require('..')
+var tree = require('..').tree
 var print = require('print-flat-tree')
 var sodium = require('sodium-universal')
 
