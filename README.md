@@ -1,12 +1,41 @@
-# antani
+## Antani
 
-A module to verify a joint account balance without leaking the individual users balances with minimum reliance on centralised hosts.
+Antani is a library containing two cryptographic data structures.
 
-Also provides a mechanism for users to use their balances to vote on proposals.
+A balance tree that allows you to write a series of signed account balances to a merkle tree. This tree is summing up each
+individual balance to a root that can be used to verify the solvancy of all balances combined. To avoid leaking metadata
+about each individual balance there is also a series of functions to split each balance into randomized smaller ones.
+We call each of these anonymised balances for buckets.
+
+For each person whose balances you want to add to the balance tree, you distribute the set of key pairs used to sign
+each bucket. The user can use these key pairs to verify that they exist in the balance tree and that all the buckets
+they own add up to their user balance. They can also use them to prove to other people that they actually own a bucket
+by signing a message with the secret key in the keypair.
+
+In addition to the balances tree a ballot/voting data structure is included. This data structure allows you to create a
+poll based on an array of options and have buckets associated with a balances file vote on an option weighted with their bucket balance.
 
 ## Usage
 
 ```js
+const antani = require('antani')
+
+const ws = antani.tree.createWriteStream('balances.json')
+
+const keypair = antani.tree.keygen()
+ws.write({
+  key: keypair.key,
+  secretKey: keypair.secretKey,
+  balance: 42
+})
+
+// ... write a ton more
+
+ws.end(function () {
+  const tree = antani.tree('balances.json')
+
+  tree.root(console.log) // prints the root of the merkle tree
+})
 ```
 
 ## API
