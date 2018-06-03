@@ -305,7 +305,7 @@ function render (state, emit) {
       title: 'Verify Ownership',
       description: html`<span>
         Verify a message using the owner's public keys<br>
-        <input class="pa2 input-reset ba bg-transparent w-100" oninput=${onVerifyOwnershipMessageInput} value="${state.verifyOwnershipMessage || ''}" placeholder="validate ownership of a message" name="message"/>
+        <textarea class="pa2 input-reset ba bg-transparent w-100" oninput=${onVerifyOwnershipMessageInput} value="${state.verifyOwnershipMessage || ''}" placeholder="validate ownership of a message" name="message"></textarea>
       </span>`,
       label: 'Verify',
       data: JSON.stringify({
