@@ -143,8 +143,8 @@ function render (state, emit) {
 
             if (missing === 0) {
               state.buckets = {
-                total: buckets.reduce(buckets, function(acc, b) {
-                  return acc + b.amount
+                total: buckets.reduce(function(acc, b) {
+                  return acc + b.balance
                 }, 0),
                 buckets: buckets
               }
