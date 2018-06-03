@@ -15,6 +15,8 @@ by signing a message with the secret key in the keypair.
 In addition to the balances tree a ballot/voting data structure is included. This data structure allows you to create a
 poll based on an array of options and have buckets associated with a balances file vote on an option weighted with their bucket balance.
 
+Read more about Antani's purpose on [Bitfinex's BIP 001](https://github.com/bitfinexcom/bip/blob/master/proposals/001.md).
+
 ## Usage
 
 ```js
