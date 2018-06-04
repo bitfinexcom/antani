@@ -1,19 +1,29 @@
 ## Antani
 
-Antani is a library containing two cryptographic data structures.
+Antani is a library for efficiently proving solvency and delegated off-chain
+voting.
 
-A balance tree that allows you to write a series of signed account balances to a merkle tree. This tree is summing up each
-individual balance to a root that can be used to verify the solvancy of all balances combined. To avoid leaking metadata
-about each individual balance there is also a series of functions to split each balance into randomized smaller ones.
-We call each of these anonymised balances for buckets.
+The first data-structure is a merkle tree expressed in JSON, that proves
+solvency, by writing account balances to leaf nodes / "buckets", and recursively
+summing these up, with the root note containing the total number of coins
+contained. This should be externally verifiable on a blockchain.
 
-For each person whose balances you want to add to the balance tree, you distribute the set of key pairs used to sign
-each bucket. The user can use these key pairs to verify that they exist in the balance tree and that all the buckets
-they own add up to their user balance. They can also use them to prove to other people that they actually own a bucket
-by signing a message with the secret key in the keypair.
+To protect user privacy, the account balance is split into "buckets" that are
+randomly sampled proportional to the total balance. Each bucket is signed with
+a key pair that the account holder is granted access to. The balance file can
+be distributed publicly by any means, while the key pairs are provided to
+account holders in privacy. The account holder can then verify that the balance
+file contains his total amount and that the key pairs are unique and used once.
+The account holder can check their balance efficiently, given a set of keys,
+without the complete tree. With the secret key a account holder can choose to
+prove ownership of buckets.
 
-In addition to the balances tree a ballot/voting data structure is included. This data structure allows you to create a
-poll based on an array of options and have buckets associated with a balances file vote on an option weighted with their bucket balance.
+To achieve delegated off-chain voting another data structure is included, to do
+ballots for account holders. Each of them can use their secret key once to cast
+a vote and have this vote count towards a ballot. Each bucket can vote once and
+is weighted by the bucket's balance. A ballot is identified by a public key, and
+upon successful voting, the voter will receive a receipt, which can be verified
+by the ballot public key.
 
 Read more about Antani's purpose on [Bitfinex's BIP 001](https://github.com/bitfinexcom/bip/blob/master/proposals/001.md).
 
