@@ -1,6 +1,6 @@
 {
   "name": "antani",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Antani is a library for efficiently proving solvency and delegated off-chain voting.",
   "main": "index.js",
   "license": "MIT",
